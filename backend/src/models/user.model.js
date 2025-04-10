@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
@@ -6,13 +6,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      trim: true,
-      lowercase: true, // Ensures emails are stored in lowercase
     },
     fullName: {
       type: String,
       required: true,
-      trim: true, // Removes leading/trailing spaces
     },
     password: {
       type: String,
@@ -21,12 +18,12 @@ const userSchema = new mongoose.Schema(
     },
     profilePic: {
       type: String,
-      default: null, // More appropriate than an empty string
+      default: "",
     },
   },
   { timestamps: true }
 );
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 export default User;

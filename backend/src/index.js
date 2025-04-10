@@ -1,36 +1,42 @@
-import express from 'express';
-import dotenv from 'dotenv';
+import express from "express";
+import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
-import authRoutes from './routers/auth.router.js';
-import messageRoutes from './routers/message.router.js'; // Fixed naming
-import { connectDB } from './lib/db.js';
+import path from "path";
+
+import { connectDB } from "./lib/db.js";
+
+import authRoutes from "./routes/auth.route.js";
+import messageRoutes from "./routes/message.route.js";
+import { app, server } from "./lib/socket.js";
 
 dotenv.config();
 
-const app = express();
+const PORT = process.env.PORT;
+const __dirname = path.resolve();
 
-const port = process.env.PORT || 5000; // Use 5000 if PORT is undefined
-
-// Middleware
-app.use(express.json()); // Enable JSON parsing
+app.use(express.json());
 app.use(cookieParser());
+app.use(
+  cors({
+    origin:"http://localhost:5173",
+    credentials: true,
+  })
+);
 
-// Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/message", messageRoutes); // Fixed naming
+app.use("/api/messages", messageRoutes);
 
-// Connect to DB and start server
-const startServer = async () => {
-  try {
-    await connectDB(); // Ensure connectDB returns a Promise
-    app.listen(port, () => {
-      console.log(`Server is running on port: ${port}`);
-    });
-  } catch (err) {
-    console.error("Database connection failed:", err);
-    process.exit(1); // Exit the process if DB connection fails
-  }
-};
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-startServer();
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+  });
+}
+
+server.listen(PORT, () => {
+  console.log("server is running on PORT:" + PORT);
+  connectDB();
+});
